@@ -4,125 +4,229 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>彩票号码生成器</title>
-    <style>
-        body {
-            font-family: 'Microsoft YaHei', sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f5f5f5;
+    <!-- TailwindCSS 通过CDN引入 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 字体图标库 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        // 配置Tailwind主题
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        },
+                        redball: '#f54545',
+                        blueball: '#3b7fff',
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-in-out',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                    },
+                },
+            },
         }
-        .container {
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        h1 {
-            text-align: center;
-            color: #333;
-        }
-        .lottery-type {
-            margin-bottom: 20px;
-        }
-        .lottery-mode {
-            margin-bottom: 20px;
-        }
-        .numbers-container {
-            margin-top: 20px;
-        }
-        .ball {
-            display: inline-block;
-            width: 36px;
-            height: 36px;
-            line-height: 36px;
-            text-align: center;
-            border-radius: 50%;
-            margin: 5px;
-            color: white;
-            font-weight: bold;
-        }
-        .red-ball {
-            background-color: #f54545;
-        }
-        .blue-ball {
-            background-color: #3b7fff;
-        }
-        .button {
-            background-color: #4CAF50;
-            border: none;
-            color: white;
-            padding: 10px 20px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 16px;
-            margin: 4px 2px;
-            cursor: pointer;
-            border-radius: 4px;
-        }
-        .dan-tuo-container, .multiple-container {
-            margin-top: 10px;
-            display: none;
-        }
-        .number-input {
-            width: 50px;
-            margin: 0 5px;
-        }
-        .input-group {
-            margin-bottom: 10px;
+    </script>
+    <style type="text/tailwindcss">
+        @layer components {
+            .ball {
+                @apply inline-flex items-center justify-center w-10 h-10 rounded-full text-white font-bold m-1 transition-all duration-300 ease-in-out;
+            }
+            .red-ball {
+                @apply bg-redball hover:shadow-lg hover:shadow-redball/30 hover:scale-110;
+            }
+            .blue-ball {
+                @apply bg-blueball hover:shadow-lg hover:shadow-blueball/30 hover:scale-110;
+            }
+            .btn {
+                @apply px-4 py-2 rounded-md font-medium transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2;
+            }
+            .btn-primary {
+                @apply bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500 dark:bg-primary-700 dark:hover:bg-primary-600;
+            }
+            .input-field {
+                @apply w-16 px-2 py-1 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white;
+            }
+            .card {
+                @apply bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden;
+            }
+            .card-header {
+                @apply px-6 py-4 border-b border-gray-200 dark:border-gray-700;
+            }
+            .card-body {
+                @apply p-6;
+            }
+            .select-field {
+                @apply block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:text-white;
+            }
+            .label {
+                @apply block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1;
+            }
+            .input-group {
+                @apply flex items-center space-x-2 mb-4;
+            }
         }
     </style>
 </head>
-<body>
-    <div class="container">
-        <h1>彩票号码生成器</h1>
-        
-        <div class="lottery-type">
-            <label>选择彩票类型：</label>
-            <select id="lotteryType" onchange="updateMode()">
-                <option value="daletou">大乐透</option>
-                <option value="shuangseqiu">双色球</option>
-            </select>
-        </div>
-
-        <div class="lottery-mode">
-            <label>选择投注模式：</label>
-            <select id="betMode" onchange="toggleMode()">
-                <option value="simple">普通投注</option>
-                <option value="multiple">复式投注</option>
-                <option value="dantuo">胆拖投注</option>
-            </select>
-        </div>
-
-        <div id="multipleContainer" class="multiple-container">
-            <div class="input-group">
-                <label>前区号码数量：</label>
-                <input type="number" id="frontCount" class="number-input" min="5" max="7" value="5">
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
+    <div class="min-h-screen flex flex-col">
+        <header class="bg-white dark:bg-gray-800 shadow-sm">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+                <h1 class="text-2xl font-bold text-primary-600 dark:text-primary-400">彩票号码生成器</h1>
+                <button id="themeToggle" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-sun text-yellow-500 dark:hidden"></i>
+                    <i class="fas fa-moon text-blue-300 hidden dark:block"></i>
+                </button>
             </div>
-            <div class="input-group">
-                <label>后区号码数量：</label>
-                <input type="number" id="backCount" class="number-input" min="2" max="3" value="2">
-            </div>
-        </div>
+        </header>
 
-        <div id="danTuoContainer" class="dan-tuo-container">
-            <div class="input-group">
-                <label>胆码数量：</label>
-                <input type="number" id="danCount" class="number-input" min="1" max="4" value="1">
-            </div>
-            <div class="input-group">
-                <label>拖码数量：</label>
-                <input type="number" id="tuoCount" class="number-input" min="1" max="16" value="5">
-            </div>
-        </div>
+        <main class="flex-grow max-w-4xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="text-xl font-semibold">选择彩票类型和投注模式</h2>
+                </div>
+                <div class="card-body space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="lotteryType" class="label">彩票类型</label>
+                            <select id="lotteryType" class="select-field" onchange="updateMode()">
+                                <option value="daletou">大乐透</option>
+                                <option value="shuangseqiu">双色球</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="betMode" class="label">投注模式</label>
+                            <select id="betMode" class="select-field" onchange="toggleMode()">
+                                <option value="simple">普通投注</option>
+                                <option value="multiple">复式投注</option>
+                                <option value="dantuo">胆拖投注</option>
+                            </select>
+                        </div>
+                    </div>
 
-        <button class="button" onclick="generateNumbers()">生成号码</button>
+                    <div id="multipleContainer" class="hidden bg-gray-50 dark:bg-gray-700/30 p-4 rounded-lg">
+                        <h3 class="text-lg font-medium mb-3">复式投注设置</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="input-group">
+                                <label for="frontCount" class="label">前区号码数量：</label>
+                                <input type="number" id="frontCount" class="input-field" min="5" max="7" value="5">
+                            </div>
+                            <div class="input-group">
+                                <label for="backCount" class="label">后区号码数量：</label>
+                                <input type="number" id="backCount" class="input-field" min="2" max="3" value="2">
+                            </div>
+                        </div>
+                    </div>
 
-        <div class="numbers-container" id="numbersDisplay"></div>
+                    <div id="danTuoContainer" class="hidden bg-gray-50 dark:bg-gray-700/30 p-4 rounded-lg">
+                        <h3 class="text-lg font-medium mb-3">胆拖投注设置</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="input-group">
+                                <label for="danCount" class="label">胆码数量：</label>
+                                <input type="number" id="danCount" class="input-field" min="1" max="4" value="1" onchange="updateTuoCount()">
+                            </div>
+                            <div class="input-group">
+                                <label for="tuoCount" class="label">拖码数量：</label>
+                                <input type="number" id="tuoCount" class="input-field" min="1" max="16" value="5">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-center">
+                        <button id="generateBtn" class="btn btn-primary" onclick="generateNumbers()">
+                            <i class="fas fa-random mr-2"></i>生成号码
+                        </button>
+                    </div>
+
+                    <div id="numbersDisplay" class="mt-6 text-center"></div>
+                </div>
+            </div>
+
+            <div class="mt-8 card">
+                <div class="card-header">
+                    <h2 class="text-xl font-semibold">历史记录</h2>
+                </div>
+                <div class="card-body">
+                    <div id="historyContainer" class="space-y-4 max-h-60 overflow-y-auto">
+                        <!-- 历史记录将在这里动态生成 -->
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="bg-white dark:bg-gray-800 shadow-inner mt-8">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                <div class="flex flex-col md:flex-row justify-between items-center">
+                    <div class="mb-4 md:mb-0">
+                        <p class="text-sm text-gray-600 dark:text-gray-400">
+                            © <span id="currentYear"></span> 彩票号码生成器. 版权所有
+                        </p>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <div class="text-sm text-gray-600 dark:text-gray-400">作者：李正博</div>
+                        <a href="https://github.com/Lizhengbo0304" target="_blank" rel="noopener noreferrer" class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
+                            <i class="fab fa-github text-xl"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </footer>
     </div>
 
     <script>
+        // 主题切换功能
+        document.addEventListener('DOMContentLoaded', function() {
+            const themeToggle = document.getElementById('themeToggle');
+            const html = document.documentElement;
+            
+            // 检查系统偏好
+            if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                html.classList.add('dark');
+            }
+
+            // 从localStorage加载主题设置
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                if (savedTheme === 'dark') {
+                    html.classList.add('dark');
+                } else {
+                    html.classList.remove('dark');
+                }
+            }
+
+            // 切换主题
+            themeToggle.addEventListener('click', () => {
+                html.classList.toggle('dark');
+                localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
+            });
+
+            // 设置年份
+            document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+            // 加载历史记录
+            loadHistory();
+
+            // 初始化投注模式
+            updateMode();
+        });
+
+        // 彩票功能相关代码
         function updateMode() {
             const lotteryType = document.getElementById('lotteryType').value;
             const danCount = document.getElementById('danCount');
@@ -130,7 +234,9 @@
             const backCount = document.getElementById('backCount');
             const tuoCount = document.getElementById('tuoCount');
 
-            if (lotteryType === 'daletou') {
+        </script>
+</body>
+</html>lotteryType === 'daletou') {
                 danCount.max = '4';
                 frontCount.min = '5';
                 frontCount.max = '7';
@@ -146,19 +252,29 @@
                 tuoCount.max = '16';
             }
 
-            if (danCount.value > danCount.max) {
+        </script>
+</body>
+</html>parseInt(danCount.value) > parseInt(danCount.max)) {
                 danCount.value = danCount.max;
             }
-            if (frontCount.value < frontCount.min) {
+        </script>
+</body>
+</html>parseInt(frontCount.value) < parseInt(frontCount.min)) {
                 frontCount.value = frontCount.min;
             }
-            if (frontCount.value > frontCount.max) {
+        </script>
+</body>
+</html>parseInt(frontCount.value) > parseInt(frontCount.max)) {
                 frontCount.value = frontCount.max;
             }
-            if (backCount.value < backCount.min) {
+        </script>
+</body>
+</html>parseInt(backCount.value) < parseInt(backCount.min)) {
                 backCount.value = backCount.min;
             }
-            if (backCount.value > backCount.max) {
+        </script>
+</body>
+</html>parseInt(backCount.value) > parseInt(backCount.max)) {
                 backCount.value = backCount.max;
             }
             updateTuoCount();
@@ -169,7 +285,9 @@
             const danCount = parseInt(document.getElementById('danCount').value);
             const tuoCount = document.getElementById('tuoCount');
             
-            if (lotteryType === 'daletou') {
+        </script>
+</body>
+</html>lotteryType === 'daletou') {
                 tuoCount.max = String(35 - danCount);
                 tuoCount.min = String(5 - danCount);
             } else {
@@ -177,24 +295,32 @@
                 tuoCount.min = String(6 - danCount);
             }
 
-            if (parseInt(tuoCount.value) < parseInt(tuoCount.min)) {
+        </script>
+</body>
+</html>parseInt(tuoCount.value) < parseInt(tuoCount.min)) {
                 tuoCount.value = tuoCount.min;
             }
-            if (parseInt(tuoCount.value) > parseInt(tuoCount.max)) {
+        </script>
+</body>
+</html>parseInt(tuoCount.value) > parseInt(tuoCount.max)) {
                 tuoCount.value = tuoCount.max;
             }
         }
 
         function toggleMode() {
-            const danTuoContainer = document.getElementById('danTuoContainer');
-            const multipleContainer = document.getElementById('multipleContainer');
             const betMode = document.getElementById('betMode').value;
-            
-            danTuoContainer.style.display = betMode === 'dantuo' ? 'block' : 'none';
-            multipleContainer.style.display = betMode === 'multiple' ? 'block' : 'none';
+            const multipleContainer = document.getElementById('multipleContainer');
+            const danTuoContainer = document.getElementById('danTuoContainer');
 
-            if (betMode === 'dantuo') {
-                updateTuoCount();
+            multipleContainer.classList.add('hidden');
+            danTuoContainer.classList.add('hidden');
+
+        </script>
+</body>
+</html>betMode === 'multiple') {
+                multipleContainer.classList.remove('hidden');
+            } else if (betMode === 'dantuo') {
+                danTuoContainer.classList.remove('hidden');
             }
         }
 
@@ -209,138 +335,206 @@
         function generateNumbers() {
             const lotteryType = document.getElementById('lotteryType').value;
             const betMode = document.getElementById('betMode').value;
-            const display = document.getElementById('numbersDisplay');
-            display.innerHTML = '';
+            let numbers = [];
 
-            if (lotteryType === 'daletou') {
-                generateDaLeTou(betMode);
-            } else {
-                generateShuangSeQiu(betMode);
-            }
-        }
-
-        function generateDaLeTou(betMode) {
-            const frontMax = 35;
-            const backMax = 12;
-            let frontNumbers = [];
-            let backNumbers = [];
-
-            if (betMode === 'dantuo') {
-                const danCount = parseInt(document.getElementById('danCount').value);
-                const tuoCount = parseInt(document.getElementById('tuoCount').value);
-                // 生成胆码
-                for (let i = 0; i < danCount; i++) {
-                    frontNumbers.push(generateRandomNumber(1, frontMax, frontNumbers));
-                }
-                // 生成拖码
-                for (let i = 0; i < tuoCount; i++) {
-                    frontNumbers.push(generateRandomNumber(1, frontMax, frontNumbers));
-                }
-                // 生成后区号码
-                for (let i = 0; i < 2; i++) {
-                    backNumbers.push(generateRandomNumber(1, backMax, backNumbers));
-                }
+        </script>
+</body>
+</html>betMode === 'simple') {
+                numbers = generateSimpleNumbers(lotteryType);
             } else if (betMode === 'multiple') {
-                const frontCount = parseInt(document.getElementById('frontCount').value);
-                const backCount = parseInt(document.getElementById('backCount').value);
-                // 生成前区号码
-                for (let i = 0; i < frontCount; i++) {
-                    frontNumbers.push(generateRandomNumber(1, frontMax, frontNumbers));
-                }
-                // 生成后区号码
-                for (let i = 0; i < backCount; i++) {
-                    backNumbers.push(generateRandomNumber(1, backMax, backNumbers));
-                }
-            } else {
-                // 普通投注
-                for (let i = 0; i < 5; i++) {
-                    frontNumbers.push(generateRandomNumber(1, frontMax, frontNumbers));
-                }
-                for (let i = 0; i < 2; i++) {
-                    backNumbers.push(generateRandomNumber(1, backMax, backNumbers));
-                }
+                numbers = generateMultipleNumbers(lotteryType);
+            } else if (betMode === 'dantuo') {
+                numbers = generateDanTuoNumbers(lotteryType);
             }
 
-            displayNumbers(frontNumbers.sort((a, b) => a - b), backNumbers.sort((a, b) => a - b));
+            displayNumbers(numbers, lotteryType);
+            saveToHistory(numbers, lotteryType, betMode);
         }
 
-        function generateShuangSeQiu(betMode) {
-            const redMax = 33;
-            const blueMax = 16;
-            let redNumbers = [];
-            let blueNumbers = [];
+        function generateSimpleNumbers(lotteryType) {
+            const frontMax = lotteryType === 'daletou' ? 35 : 33;
+            const backMax = lotteryType === 'daletou' ? 12 : 16;
+            const frontCount = lotteryType === 'daletou' ? 5 : 6;
+            const backCount = lotteryType === 'daletou' ? 2 : 1;
 
-            if (betMode === 'dantuo') {
-                const danCount = parseInt(document.getElementById('danCount').value);
-                const tuoCount = parseInt(document.getElementById('tuoCount').value);
-                // 生成胆码
-                for (let i = 0; i < danCount; i++) {
-                    redNumbers.push(generateRandomNumber(1, redMax, redNumbers));
-                }
-                // 生成拖码
-                for (let i = 0; i < tuoCount; i++) {
-                    redNumbers.push(generateRandomNumber(1, redMax, redNumbers));
-                }
-                // 生成蓝球
-                blueNumbers.push(generateRandomNumber(1, blueMax));
-            } else if (betMode === 'multiple') {
-                const frontCount = parseInt(document.getElementById('frontCount').value);
-                const backCount = parseInt(document.getElementById('backCount').value);
-                // 生成红球
-                for (let i = 0; i < frontCount; i++) {
-                    redNumbers.push(generateRandomNumber(1, redMax, redNumbers));
-                }
-                // 生成蓝球
-                for (let i = 0; i < backCount; i++) {
-                    blueNumbers.push(generateRandomNumber(1, blueMax, blueNumbers));
-                }
-            } else {
-                // 普通投注
-                for (let i = 0; i < 6; i++) {
-                    redNumbers.push(generateRandomNumber(1, redMax, redNumbers));
-                }
-                blueNumbers.push(generateRandomNumber(1, blueMax));
+            const frontNumbers = [];
+            const backNumbers = [];
+
+            for (let i = 0; i < frontCount; i++) {
+                frontNumbers.push(generateRandomNumber(1, frontMax, frontNumbers));
+            }
+            for (let i = 0; i < backCount; i++) {
+                backNumbers.push(generateRandomNumber(1, backMax, backNumbers));
             }
 
-            displayNumbers(redNumbers.sort((a, b) => a - b), blueNumbers.sort((a, b) => a - b));
+            frontNumbers.sort((a, b) => a - b);
+            backNumbers.sort((a, b) => a - b);
+
+            return { front: frontNumbers, back: backNumbers };
         }
 
-        function displayNumbers(redNumbers, blueNumbers) {
+        function generateMultipleNumbers(lotteryType) {
+            const frontCount = parseInt(document.getElementById('frontCount').value);
+            const backCount = parseInt(document.getElementById('backCount').value);
+            const frontMax = lotteryType === 'daletou' ? 35 : 33;
+            const backMax = lotteryType === 'daletou' ? 12 : 16;
+
+            const frontNumbers = [];
+            const backNumbers = [];
+
+            for (let i = 0; i < frontCount; i++) {
+                frontNumbers.push(generateRandomNumber(1, frontMax, frontNumbers));
+            }
+            for (let i = 0; i < backCount; i++) {
+                backNumbers.push(generateRandomNumber(1, backMax, backNumbers));
+            }
+
+            frontNumbers.sort((a, b) => a - b);
+            backNumbers.sort((a, b) => a - b);
+
+            return { front: frontNumbers, back: backNumbers };
+        }
+
+        function generateDanTuoNumbers(lotteryType) {
+            const danCount = parseInt(document.getElementById('danCount').value);
+            const tuoCount = parseInt(document.getElementById('tuoCount').value);
+            const frontMax = lotteryType === 'daletou' ? 35 : 33;
+            const backMax = lotteryType === 'daletou' ? 12 : 16;
+            const frontRequired = lotteryType === 'daletou' ? 5 : 6;
+            const backCount = lotteryType === 'daletou' ? 2 : 1;
+
+            const danNumbers = [];
+            const tuoNumbers = [];
+            const backNumbers = [];
+
+            // 生成胆码
+            for (let i = 0; i < danCount; i++) {
+                danNumbers.push(generateRandomNumber(1, frontMax, danNumbers));
+            }
+
+            // 生成拖码
+            for (let i = 0; i < tuoCount; i++) {
+                tuoNumbers.push(generateRandomNumber(1, frontMax, [...danNumbers, ...tuoNumbers]));
+            }
+
+            // 生成后区号码
+            for (let i = 0; i < backCount; i++) {
+                backNumbers.push(generateRandomNumber(1, backMax, backNumbers));
+            }
+
+            danNumbers.sort((a, b) => a - b);
+            tuoNumbers.sort((a, b) => a - b);
+            backNumbers.sort((a, b) => a - b);
+
+            return { dan: danNumbers, tuo: tuoNumbers, back: backNumbers };
+        }
+
+        function displayNumbers(numbers, lotteryType) {
             const display = document.getElementById('numbersDisplay');
-            const lotteryType = document.getElementById('lotteryType').value;
-            const betMode = document.getElementById('betMode').value;
+            let html = '';
 
-            let html = '<div>';
-            
-            if (betMode === 'dantuo') {
-                const danCount = parseInt(document.getElementById('danCount').value);
-                html += '<p>胆码：</p>';
-                for (let i = 0; i < danCount; i++) {
-                    html += `<span class="ball red-ball">${redNumbers[i].toString().padStart(2, '0')}</span>`;
-                }
-                html += '<p>拖码：</p>';
-                for (let i = danCount; i < redNumbers.length; i++) {
-                    html += `<span class="ball red-ball">${redNumbers[i].toString().padStart(2, '0')}</span>`;
-                }
-            } else {
-                redNumbers.forEach(num => {
-                    html += `<span class="ball red-ball">${num.toString().padStart(2, '0')}</span>`;
+        </script>
+</body>
+</html>numbers.dan) {
+                // 胆拖投注显示
+                html += '<div class="mb-2">胆码：';
+                numbers.dan.forEach(num => {
+                    html += `<span class="ball red-ball">${String(num).padStart(2, '0')}</span>`;
                 });
+                html += '</div><div class="mb-2">拖码：';
+                numbers.tuo.forEach(num => {
+                    html += `<span class="ball red-ball">${String(num).padStart(2, '0')}</span>`;
+                });
+                html += '</div><div>后区：';
+                numbers.back.forEach(num => {
+                    html += `<span class="ball blue-ball">${String(num).padStart(2, '0')}</span>`;
+                });
+                html += '</div>';
+            } else {
+                // 普通和复式投注显示
+                html += '<div class="mb-2">前区：';
+                numbers.front.forEach(num => {
+                    html += `<span class="ball red-ball">${String(num).padStart(2, '0')}</span>`;
+                });
+                html += '</div><div>后区：';
+                numbers.back.forEach(num => {
+                    html += `<span class="ball blue-ball">${String(num).padStart(2, '0')}</span>`;
+                });
+                html += '</div>';
             }
 
-            html += ' + ';
-            
-            blueNumbers.forEach(num => {
-                html += `<span class="ball blue-ball">${num.toString().padStart(2, '0')}</span>`;
-            });
-
-            html += '</div>';
             display.innerHTML = html;
         }
 
-        // 初始化页面
-        updateMode();
-        toggleMode();
+        function saveToHistory(numbers, lotteryType, betMode) {
+            const history = JSON.parse(localStorage.getItem('lotteryHistory') || '[]');
+            const timestamp = new Date().toLocaleString();
+            const entry = {
+                timestamp,
+                lotteryType,
+                betMode,
+                numbers
+            };
+
+            history.unshift(entry);
+        </script>
+</body>
+</html>history.length > 10) history.pop(); // 只保留最近10条记录
+            localStorage.setItem('lotteryHistory', JSON.stringify(history));
+
+            displayHistory();
+        }
+
+        function loadHistory() {
+            const history = JSON.parse(localStorage.getItem('lotteryHistory') || '[]');
+            displayHistory(history);
+        }
+
+        function displayHistory() {
+            const history = JSON.parse(localStorage.getItem('lotteryHistory') || '[]');
+            const container = document.getElementById('historyContainer');
+            let html = '';
+
+            history.forEach(entry => {
+                html += `
+                    <div class="p-4 bg-gray-50 dark:bg-gray-700/30 rounded-lg">
+                        <div class="flex justify-between items-start mb-2">
+                            <div class="text-sm text-gray-600 dark:text-gray-400">${entry.timestamp}</div>
+                            <div class="text-sm font-medium">${entry.lotteryType === 'daletou' ? '大乐透' : '双色球'} - ${getBetModeName(entry.betMode)}</div>
+                        </div>
+                        ${formatHistoryNumbers(entry.numbers)}
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html || '<div class="text-center text-gray-500 dark:text-gray-400">暂无历史记录</div>';
+        }
+
+        function getBetModeName(mode) {
+            const modes = {
+                simple: '普通投注',
+                multiple: '复式投注',
+                dantuo: '胆拖投注'
+            };
+            return modes[mode] || mode;
+        }
+
+        function formatHistoryNumbers(numbers) {
+        </script>
+</body>
+</html>numbers.dan) {
+                return `
+                    <div class="text-sm mb-1">胆码：${numbers.dan.map(n => String(n).padStart(2, '0')).join(', ')}</div>
+                    <div class="text-sm mb-1">拖码：${numbers.tuo.map(n => String(n).padStart(2, '0')).join(', ')}</div>
+                    <div class="text-sm">后区：${numbers.back.map(n => String(n).padStart(2, '0')).join(', ')}</div>
+                `;
+            } else {
+                return `
+                    <div class="text-sm mb-1">前区：${numbers.front.map(n => String(n).padStart(2, '0')).join(', ')}</div>
+                    <div class="text-sm">后区：${numbers.back.map(n => String(n).padStart(2, '0')).join(', ')}</div>
+                `;
+            }
+        }
     </script>
 </body>
 </html>
